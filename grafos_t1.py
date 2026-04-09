@@ -1,3 +1,7 @@
+import networkx as nx  # manipular grafos
+import matplotlib.pyplot as plt  # desenhar grafos
+
+
 class Grafo:
     # method init usado para principalmente para criar objetos em python
     def __init__(self, dirigido=False):
@@ -121,3 +125,20 @@ class Grafo:
             direcao = f"{v} <--> {w}"
         tipo = "Arco" if self.dirigido else "Aresta"
         print(f" [-] {tipo} '{id_aresta}' ({direcao}) removida.")
+
+    def monstrar_grafos(self, titulo="Grafo"):
+        """
+        exibe o grafo na tela usando o mathplotlib
+        """
+        if self.dirigido:
+            G = nx.DiGraph()
+        else:
+            G = nx.Graph()
+
+        # adiciona todos os vertices no objeto
+        G.add_edges_from(self.vertices.keys())
+
+        labels_arestas = {}
+        for aid, (v,w,peso) in self.arestas.items():
+            G.add_edge(v,w,weight=peso)
+            labels_arestas[(v,w)} = f"{aid} (w={peso})"
