@@ -61,7 +61,7 @@ class Grafo:
             direcao = f"{v} --> {w}"
         else:
             # se for nao dirigido a seta e uma via de mao dupla
-            direcao = f"{v} <-> {w}"
+            direcao = f"{v} <--> {w}"
 
         tipo = "Arco" if self.dirigido else "Aresta"
         print(f"[+] {tipo} '{id_aresta}' ({direcao}, peso={peso}) inserida")
