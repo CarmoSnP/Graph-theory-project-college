@@ -126,7 +126,7 @@ class Grafo:
         tipo = "Arco" if self.dirigido else "Aresta"
         print(f" [-] {tipo} '{id_aresta}' ({direcao}) removida.")
 
-    def monstrar_grafos(self, titulo="Grafo"):
+    def mostrar_grafo(self, titulo="Grafo"):
         """
         exibe o grafo na tela usando o mathplotlib
         """
@@ -136,7 +136,7 @@ class Grafo:
             G = nx.Graph()
 
         # adiciona todos os vertices no objeto
-        G.add_edges_from(self.vertices.keys())
+        G.add_nodes_from(self.vertices.keys())
 
         labels_arestas = {}
         for aid, (v, w, peso) in self.arestas.items():
@@ -164,3 +164,14 @@ class Grafo:
         plt.axis("off")  # off para retirar os eixos x e y
         plt.tight_layout()  # ajusto espacamento
         plt.show()  # exibir na tela
+
+
+# teste rápido
+# g = Grafo(dirigido=False)
+# g.insert_vertice("A")
+# g.insert_vertice("B")
+# g.insert_vertice("C")
+# g.insert_aresta("A", "B", peso=4)
+# g.insert_aresta("B", "C", peso=2)
+# g.insert_aresta("A", "C", peso=7)
+# g.mostrar_grafo("grafo teste")
