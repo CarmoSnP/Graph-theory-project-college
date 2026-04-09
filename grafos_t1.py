@@ -65,3 +65,31 @@ class Grafo:
 
         tipo = "Arco" if self.dirigido else "Aresta"
         print(f"[+] {tipo} '{id_aresta}' ({direcao}, peso={peso}) inserida")
+
+    def remover_vertice(self, v):
+        """
+        remover o vertice e todos ligados a ele.
+        """
+        if v not in self.vertices:
+            print(f"[!] Vertice '{v}' nao encontrado")
+            return
+
+        # encontra todas as arestas que estao ligadas ao vertices
+        ids_remover = []
+        for id_aresta, (origem, destino, peso) in self.arestas.items():
+            if origem == v or destino == v:
+                ids_remover.append(id_aresta)
+        # laco para remover as arestas
+        for id_aresta in ids_remover:
+            self.remover_aresta(id_aresta)
+
+        # remover o vertice
+        del self.vertices[v]
+        del self.adj[v]
+
+        print(f"[-] Vertice '{v}' e arestas ligados a ele foram removidos")
+
+    def remover_aresta(self, id_aresta):
+        """
+        remover aresta ou arco pelo vertice
+        """
