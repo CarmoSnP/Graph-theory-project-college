@@ -139,6 +139,28 @@ class Grafo:
         G.add_edges_from(self.vertices.keys())
 
         labels_arestas = {}
-        for aid, (v,w,peso) in self.arestas.items():
-            G.add_edge(v,w,weight=peso)
-            labels_arestas[(v,w)} = f"{aid} (w={peso})"
+        for aid, (v, w, peso) in self.arestas.items():
+            G.add_edge(v, w, weight=peso)
+            labels_arestas[(v, w)] = f"{aid} (w={peso})"
+
+        # define o layout na tela a posicao
+        pos = nx.spring_layout(G, seed=42)
+
+        # desenha o grafo
+        plt.figure(figsize=(10, 7))
+        plt.title(titulo, fontsize=14, fontweight="bold")
+
+        # desenha os vertices
+        nx.draw_networkx_nodes(G, pos, node_color="steelblue", node_size=800)
+
+        # desenha as linhas
+        nx.draw_networkx_edges(
+            G, pos, edge_color="gray", width=2, arrows=self.dirigido, arrowsize=20
+        )
+
+        # desenha o id e peso das linhas
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=labels_arestas, font_size=8)
+
+        plt.axis("off")  # off para retirar os eixos x e y
+        plt.tight_layout()  # ajusto espacamento
+        plt.show()  # exibir na tela
