@@ -93,3 +93,31 @@ class Grafo:
         """
         remover aresta ou arco pelo vertice
         """
+        if id_aresta not in self.arestas:
+            print(f" [!] Aresta '{id_aresta}' nao encontrada")
+            return
+        # pega as infos da aresta
+        v, w, peso = self.arestas[id_aresta]
+
+        # remove da lista de adjacencia do vertice
+        self.adj[v] = [
+            (vizinho, aid, p) for (vizinho, aid, p) in self.adj[v] if aid != id_aresta
+        ]
+
+        # se nao dirigiro, remove da lista de adj
+        if not self.dirigido:
+            self.adj[w] = [
+                (vizinho, aid, p)
+                for (vizinho, aid, p) in self.adj[w]
+                if aid != id_aresta
+            ]
+        # remove da lista de arestas
+        del self.arestas[id_aresta]
+
+        #seta para dirigido e nao dirigido
+        if self.dirigido:
+            direcao = f"{v} --> {w}"
+        else:
+            direcao = f"{v} <--> {w}"
+        tipo =  "Arco" if self.dirigido else = "Aresta"
+        print(f" [-] {tipo} '{id_aresta}' ({direcao}) removida.")
