@@ -114,10 +114,10 @@ class Grafo:
         # remove da lista de arestas
         del self.arestas[id_aresta]
 
-        #seta para dirigido e nao dirigido
+        # seta para dirigido e nao dirigido
         if self.dirigido:
             direcao = f"{v} --> {w}"
         else:
             direcao = f"{v} <--> {w}"
-        tipo =  "Arco" if self.dirigido else = "Aresta"
+        tipo = "Arco" if self.dirigido else "Aresta"
         print(f" [-] {tipo} '{id_aresta}' ({direcao}) removida.")
