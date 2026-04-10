@@ -2,6 +2,8 @@
 
 ## GRAFOS T1 – profª Fernanda Cunha
 
+## Alunos : Igor do Carmo e Wellington Moura
+
 ---
 
 Dado que um grafo G = (V, A) consiste em:
