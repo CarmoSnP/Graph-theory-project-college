@@ -5,10 +5,16 @@ from collections import deque  # fila de Busca em largura
 
 """
 estrutura de variaveis
-peso = 2
-v    = 'A'   (origem)
-w    = 'C'   (destino)
-aid  = 'a2'  (identificador)
+    v        = vertice de origem          ex: 'A'
+    w        = vertice de destino         ex: 'C'
+    peso     = custo/peso da aresta       ex: 4
+    aid      = identificador da aresta    ex: 'a1'
+    idx      = indice do vertice na matriz ex: 0, 1, 2...
+    pai      = dicionario de quem descobriu cada vertice no BFS/DFS
+    heap     = fila de prioridade do Prim (sempre retorna o menor)
+    alcanca  = matriz de alcancabilidade do Roy (True/False)
+    visitados= conjunto de vertices ja processados
+    caminho  = lista de vertices do caminho encontrado (BFS/DFS)
 """
 
 
@@ -36,6 +42,13 @@ class Grafo:
         metodo para inserir um vertice isolado no grafo.
         v = identificador do vértice (ex: 'a', 1, 'SC')
         """
+
+        v = v.upper()
+
+        if not v:
+            print("[!] ID do vertice nao pode ser vazio.")
+            return
+
         if v in self.vertices:
             print(f"[!] Vertice '{v}' ja existe")
             return
@@ -53,6 +66,13 @@ class Grafo:
 
         usando append para adicionar ao final
         """
+        v = v.upper()
+        w = w.upper()
+
+        if not v or not w:
+            print("[!] Vertice de origem ou destino nao pode ser vazio.")
+            return
+
         if v not in self.vertices or w not in self.vertices:
             print(f"[!] Vertice '{v}' ou '{w}' nao existem")
             return
@@ -84,6 +104,9 @@ class Grafo:
         """
         remover o vertice e todos ligados a ele.
         """
+
+        v = v.upper()
+
         if v not in self.vertices:
             print(f"[!] Vertice '{v}' nao encontrado")
             return
@@ -107,6 +130,9 @@ class Grafo:
         """
         remover aresta ou arco pelo vertice
         """
+
+        id_aresta = id_aresta.lower()
+
         if id_aresta not in self.arestas:
             print(f" [!] Aresta '{id_aresta}' nao encontrada")
             return
@@ -151,7 +177,17 @@ class Grafo:
         labels_arestas = {}
         for aid, (v, w, peso) in self.arestas.items():
             G.add_edge(v, w, weight=peso)
-            labels_arestas[(v, w)] = f"{aid} (w={peso})"
+            chave = (v, w)
+            chave_inv = (w, v)
+            if chave in labels_arestas:
+                # ja existe label nessa aresta, adiciona na mesma linha
+                labels_arestas[chave] += f"\n{aid} (w={peso})"
+            elif chave_inv in labels_arestas:
+                # ja existe aresta no sentido inverso, adiciona lá
+                labels_arestas[chave_inv] += f"\n{aid} (w={peso})"
+            else:
+                # primeira aresta dos vertices
+                labels_arestas[chave] = f"{aid} (w={peso})"
 
         # define o layout na tela a posicao
         pos = nx.spring_layout(G, seed=42)
@@ -185,7 +221,13 @@ class Grafo:
 
         # desenha as linhas
         nx.draw_networkx_edges(
-            G, pos, edge_color=cores, width=2, arrows=self.dirigido, arrowsize=20
+            G,
+            pos,
+            edge_color=cores,
+            width=2,
+            arrows=self.dirigido,
+            arrowsize=20,
+            connectionstyle="arc3,rad=0.2",  # curvas na setas
         )
 
         # desenha o id e peso das linhas
@@ -202,7 +244,7 @@ class Grafo:
 
         if inicio not in self.vertices:
             print(f"[!] Vertice '{inicio}' nao existe dentro do grafo.")
-            return
+            return [], 0
 
         visitados = {inicio}
         arestas_agm = []
@@ -240,6 +282,9 @@ class Grafo:
         """
         arestas_agm, custo = self.prim(inicio)
 
+        if not arestas_agm:
+            return
+
         print(f"\n Vertice inicial de prim '{inicio}'")
         for v, w, peso, aid in arestas_agm:
             print(f"{v} --[{aid}, peso={peso}]-->{w}")
@@ -260,10 +305,10 @@ class Grafo:
             print(f"[!] Vertice de incio ou fim invalido.")
             return [], []
 
-        fila = deque([origem])
-        visitados = {origem}
+        fila = deque([origem])  # começa com a origem na fila
+        visitados = {origem}  # marca origem como visitada
         pai = {origem: None}  # guardar o pai de cada vertice
-        arestas_arvore = []
+        arestas_arvore = []  # arestas que formam a árvore BFS
 
         encontrado = False
         while fila:
@@ -294,27 +339,262 @@ class Grafo:
         usa fila, busca em largura
         """
         caminho, arestas_arvore = self.bsf(origem, destino)
-        print(f"\ Arvore de busca em largura: =='{origem}' --> '{destino}'==")
+
+        if not caminho:
+            print("caminho nao foi encontrado")
+            return
+
+        print(f" Arvore de busca em largura: =='{origem}' --> '{destino}'==")
         if caminho:
             print(f"Caminho: {'->' .join(map(str, caminho))}")
         else:
             print("caminho nao encontrado")
+            return
 
         self.mostrar_grafo(
             titulo=f"BFS: {origem} -> {destino} | Caminho: {'->'.join(map(str, caminho))}",
             destaque_arestas=arestas_arvore,
         )
 
+    def dfs(self, origem, destino):
+        """
+        busca em profundidade, vai o mais fundo possivel antes de voltar
+        usa pilha nao fila
+        """
 
-# teste rápido
-g = Grafo(dirigido=False)
-g.insert_vertice("A")
-g.insert_vertice("B")
-g.insert_vertice("C")
-g.insert_vertice("D")
-g.insert_aresta("A", "B", peso=4)
-g.insert_aresta("A", "C", peso=2)
-g.insert_aresta("B", "C", peso=5)
-g.insert_aresta("B", "D", peso=10)
-g.insert_aresta("C", "D", peso=3)
-g.mostrar_bfs("A", "D")
+        if origem not in self.vertices or destino not in self.vertices:
+            print(f"[!] Vertice de inicio ou de fim invalido")
+            return [], []
+
+        pilha = [origem]  # começa com a origem na pilha
+        visitados = {origem}  # marca origem como visitada
+        pai = {origem: None}  # guarda quem descobriu cada vértice
+        arestas_arvore = []  # arestas que formam a árvore DFS
+
+        encontrado = False
+        while pilha:
+            v = pilha.pop()
+
+            if v == destino:
+                encontrado = True
+                break
+            for w, aid, _ in self.adj[v]:
+                if w not in visitados:
+                    visitados.add(w)
+                    pai[w] = v
+                    arestas_arvore.append((v, w))
+                    pilha.append(w)  # adiciona ao topo
+        caminho = []
+        if encontrado:
+            cur = destino
+            while cur is not None:
+                caminho.append(cur)
+                cur = pai[cur]
+            caminho.reverse()
+
+        return caminho, arestas_arvore
+
+    def mostrar_dfs(self, origem, destino):
+        """
+        executa DFS e exibe a arvore
+        """
+
+        caminho, arestas_arvore = self.dfs(origem, destino)
+
+        if not caminho:
+            print("caminho nao foi encontrado")
+            return
+
+        print(f"\n = DFS: '{origem}' --> '{destino}' =")
+        if caminho:
+            print(f" Caminho: {'->'.join(map(str, caminho))}")
+        else:
+            print(" Caminho nao encontrado.")
+            return
+        self.mostrar_grafo(
+            titulo=f"DFS: {origem} -> {destino} | Caminho: {' -> '.join(map(str, caminho))}",
+            destaque_arestas=arestas_arvore,
+        )
+
+    def roy(self):
+        """
+        encontra componentes conexas ou fortemente conexas
+        """
+        verts = list(self.vertices.keys())
+        n = len(verts)
+        idx = {v: i for i, v in enumerate(verts)}  # mapeia vertice e indice
+
+        # matriz de alcancabilidade - alcanca[i][i] = true se i chega em j
+        alcanca = [[False] * n for _ in range(n)]
+
+        # todo vertice alcanca a si mesmo
+        for i in range(n):
+            alcanca[i][i] = True
+
+        for v, w, _ in self.arestas.values():
+            alcanca[idx[v]][idx[w]] = True
+            if not self.dirigido:
+                alcanca[idx[w]][idx[v]] = True
+
+        # fechamento transitivo de Roy
+        # se i alcança k E k alcança j → i alcança j
+        for k in range(n):
+            for i in range(n):
+                for j in range(n):
+                    if alcanca[i][k] and alcanca[k][j]:
+                        alcanca[i][j] = True
+
+        # agrupa componentes
+        componentes = []
+        nao_visitados = set(range(n))
+
+        while nao_visitados:
+            i = next(iter(nao_visitados))
+            componente = set()
+            for j in list(nao_visitados):
+                if self.dirigido:
+                    # fortemente conexo: i→j E j→i
+                    if alcanca[i][j] and alcanca[j][i]:
+                        componente.add(j)
+                else:
+                    # conexo: i→j (basta alcançar)
+                    if alcanca[i][j]:
+                        componente.add(j)
+            componentes.append({verts[j] for j in componente})
+            nao_visitados -= componente
+
+        return componentes
+
+    def mostrar_roy(self):
+        """
+        Executa Roy e exibe os conjuntos de componentes.
+        """
+        comps = self.roy()
+        tipo = "Fortemente Conexas" if self.dirigido else "Conexas"
+        print(f"\n  === Componentes {tipo} (Roy) ===")
+        for i, comp in enumerate(comps, 1):
+            print(f"  Componente {i}: {sorted(comp, key=str)}")
+
+
+def cabecalho():
+    print("\n" + "=" * 60)
+    print("        TRABALHO T1 - GRAFOS")
+    print("   UNIVALI 2026/1 | Profa Fernanda Cunha")
+    print("=" * 60)
+
+
+def menu():
+    print("\n" + "-" * 60)
+    print("  MENU PRINCIPAL")
+    print("-" * 60)
+    print("  [1]  Inserir vertice")
+    print("  [2]  Inserir aresta/arco")
+    print("  [3]  Remover vertice")
+    print("  [4]  Remover aresta/arco")
+    print("  [5]  Mostrar grafo")
+    print("  [6]  Algoritmo de Prim (AGM)")
+    print("  [7]  Busca em Largura - BFS")
+    print("  [8]  Busca em Profundidade - DFS")
+    print("  [9]  Componentes Conexas - Roy")
+    print("  [0]  Sair")
+    print("-" * 60)
+
+
+def info_grafo(g):
+    tipo = "Dirigido" if g.dirigido else "Nao-Dirigido"
+    print(f"\n  Grafo atual: {tipo}")
+    print(f"  Vertices ({len(g.vertices)}): {list(g.vertices.keys())}")
+    print(f"  Arestas  ({len(g.arestas)}): {list(g.arestas.keys())}")
+
+
+def main():
+    cabecalho()
+
+    print("\n  Tipo de grafo:")
+    print("  [1] Nao-dirigido (arestas)")
+    print("  [2] Dirigido (arcos/digrafo)")
+    escolha = input("  Escolha: ").strip()
+    dirigido = escolha == "2"
+    g = Grafo(dirigido=dirigido)
+    tipo_str = "Dirigido" if dirigido else "Nao-Dirigido"
+    print(f"\n  Grafo {tipo_str} criado!")
+
+    while True:
+        info_grafo(g)
+        menu()
+        opcao = input("  Opcao: ").strip()
+
+        if opcao == "1":
+            v = input("  ID do vertice: ").strip().upper()
+            g.insert_vertice(v)
+
+        elif opcao == "2":
+            v = input("  Vertice de origem: ").strip().upper()
+            w = input("  Vertice de destino: ").strip().upper()
+            try:
+                peso = float(input("  Peso (padrao=1): ").strip() or 1)
+            except ValueError:
+                peso = 1
+            g.insert_aresta(v, w, peso=peso)
+
+        elif opcao == "3":
+            v = input("  ID do vertice a remover: ").strip().upper()
+            g.remover_vertice(v)
+
+        elif opcao == "4":
+            aid = input("  ID da aresta a remover (ex: a1): ").strip().upper()
+            g.remover_aresta(aid)
+
+        elif opcao == "5":
+            if not g.vertices:
+                print("  [!] Grafo vazio.")
+            else:
+                g.mostrar_grafo(titulo="Grafo Atual")
+
+        elif opcao == "6":
+            if g.dirigido:
+                print("  [!] Prim apenas para grafos nao-dirigidos.")
+            else:
+                inicio = input("  Vertice inicial: ").strip().upper()
+                g.mostrar_prim(inicio)
+
+        elif opcao == "7":
+            origem = input("  Vertice de origem: ").strip().upper()
+            destino = input("  Vertice de destino: ").strip().upper()
+            g.mostrar_bfs(origem, destino)
+
+        elif opcao == "8":
+            origem = input("  Vertice de origem: ").strip().upper()
+            destino = input("  Vertice de destino: ").strip().upper()
+            g.mostrar_dfs(origem, destino)
+
+        elif opcao == "9":
+            g.mostrar_roy()
+
+        elif opcao == "0":
+            print("\n  Code by Igor Carmo and Wellington Moura!\n")
+            break
+
+        else:
+            print("  [!] Opcao invalida.")
+
+        input("\n  Pressione ENTER para continuar...")
+
+
+# ponto de entrada do programa
+if __name__ == "__main__":
+    main()
+
+
+# teste rapido
+# g = Grafo(dirigido=False)
+# g.insert_vertice("A")
+# g.insert_vertice("B")
+# g.insert_vertice("C")
+# g.insert_vertice("D")
+# g.insert_aresta("A", "B", peso=4)
+# g.insert_aresta("A", "C", peso=2)
+# g.insert_aresta("B", "C", peso=5)
+# g.insert_aresta("B", "D", peso=10)
+# g.insert_aresta("C", "D", peso=3)
+# g.mostrar_bfs("A", "D")
